@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BannerForge — Bannières Discord sur Mesure</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --border: #1e1e2e;
+    --accent: #5865F2;
+    --accent2: #eb459e;
+    --accent3: #57F287;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(88,101,242,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(88,101,242,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-orb.a { width: 500px; height: 500px; background: rgba(88,101,242,0.12); top: -100px; left: -100px; }
+  .glow-orb.b { width: 400px; height: 400px; background: rgba(235,69,158,0.08); bottom: -100px; right: -100px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* Hero */
+  .hero {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 120px 48px 80px;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(88,101,242,0.15);
+    border: 1px solid rgba(88,101,242,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 99px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 10vw, 120px);
+    line-height: 0.95;
+    letter-spacing: 4px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    max-width: 520px;
+    margin: 24px auto 48px;
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.7;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-cta {
+    display: flex; gap: 16px; justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); background: rgba(88,101,242,0.08); }
+
+  /* Showcase banners preview */
+  .preview-strip {
+    position: relative; z-index: 1;
+    display: flex; gap: 12px;
+    padding: 0 48px 80px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .preview-strip::-webkit-scrollbar { display: none; }
+
+  .banner-card {
+    flex: 0 0 340px;
+    height: 120px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s, border-color 0.3s;
+    animation: fadeUp 0.5s ease both;
+  }
+  .banner-card:hover { transform: translateY(-4px) scale(1.02); border-color: var(--accent); }
+  .banner-card:nth-child(1) { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+  .banner-card:nth-child(2) { background: linear-gradient(135deg, #0d0d0d, #1a0a2e, #2d1b69); }
+  .banner-card:nth-child(3) { background: linear-gradient(135deg, #0a0a0a, #1e3a2e, #0d4a2e); }
+  .banner-card:nth-child(4) { background: linear-gradient(135deg, #1a0000, #3d0000, #7b0000); }
+  .banner-card:nth-child(5) { background: linear-gradient(135deg, #0a0a1a, #0d1b4a, #1a3a8a); }
+
+  .banner-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.2);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 4px;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 0 30px rgba(88,101,242,0.8);
+  }
+
+  .banner-tag {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 10px; font-weight: 500; letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.5);
+    padding: 4px 10px; border-radius: 99px;
+    color: var(--muted);
+  }
+
+  /* Section */
+  .section { position: relative; z-index: 1; padding: 80px 48px; }
+  .section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .section h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 56px);
+    letter-spacing: 3px;
+    margin-bottom: 48px;
+  }
+
+  /* Packages */
+  .packages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .package {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  .package:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .package.featured {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(88,101,242,0.1), rgba(235,69,158,0.05));
+  }
+
+  .featured-tag {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; padding: 5px 16px; border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  .pkg-icon { font-size: 32px; margin-bottom: 16px; }
+  .pkg-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; margin-bottom: 8px; }
+  .pkg-price {
+    font-size: 42px; font-weight: 300;
+    margin-bottom: 8px;
+  }
+  .pkg-price span { font-size: 18px; color: var(--muted); vertical-align: top; margin-top: 8px; display: inline-block; }
+  .pkg-price .unit { font-size: 14px; vertical-align: baseline; margin-top: 0; }
+  .pkg-desc { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+
+  .pkg-features { list-style: none; margin-bottom: 32px; }
+  .pkg-features li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .pkg-features li:last-child { border-bottom: none; }
+  .check { color: var(--accent3); font-size: 16px; }
+
+  /* Order Form */
+  .form-section {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  label { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0.5px; }
+
+  input, textarea, select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { min-height: 120px; resize: vertical; }
+  select option { background: var(--surface); }
+
+  .color-row { display: flex; gap: 12px; align-items: center; }
+  .color-swatch {
+    width: 44px; height: 44px; border-radius: 8px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+  }
+  .color-swatch:hover, .color-swatch.active { transform: scale(1.1); border-color: var(--accent); }
+  .color-swatch.blue { background: linear-gradient(135deg, #5865F2, #4752C4); }
+  .color-swatch.pink { background: linear-gradient(135deg, #eb459e, #c0366d); }
+  .color-swatch.green { background: linear-gradient(135deg, #57F287, #3ba160); }
+  .color-swatch.red { background: linear-gradient(135deg, #ed4245, #c73235); }
+  .color-swatch.gold { background: linear-gradient(135deg, #f0b232, #c48a15); }
+  .color-swatch.cyan { background: linear-gradient(135deg, #00d4ff, #0096b3); }
+
+  .form-note {
+    background: rgba(88,101,242,0.08);
+    border: 1px solid rgba(88,101,242,0.2);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .submit-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+  /* Success state */
+  .success-msg {
+    display: none;
+    text-align: center;
+    padding: 60px 0;
+    animation: fadeUp 0.5s ease;
+  }
+  .success-msg .icon { font-size: 64px; margin-bottom: 20px; }
+  .success-msg h3 { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 3px; color: var(--accent3); margin-bottom: 12px; }
+  .success-msg p { color: var(--muted); font-size: 15px; }
+
+  /* FAQ */
+  .faq-list { max-width: 700px; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+    cursor: pointer;
+  }
+  .faq-q {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 500; font-size: 15px;
+  }
+  .faq-arrow { color: var(--accent); font-size: 20px; transition: transform 0.3s; }
+  .faq-item.open .faq-arrow { transform: rotate(45deg); }
+  .faq-a {
+    max-height: 0; overflow: hidden;
+    font-size: 14px; color: var(--muted); line-height: 1.7;
+    transition: max-height 0.3s ease, padding 0.3s;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding-top: 16px; }
+
+  /* Footer */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted); font-size: 13px;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 48px;
+  }
+
+  /* Specs badges */
+  .specs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+  .spec-badge {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 99px;
+    font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .spec-badge strong { color: var(--text); }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 80px 20px 60px; }
+    .section { padding: 60px 20px; }
+    .preview-strip { padding: 0 20px 60px; }
+    footer { padding: 30px 20px; flex-direction: column; gap: 16px; text-align: center; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-orb a"></div>
+<div class="glow-orb b"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">BANNERFORGE</div>
+  <ul class="nav-links">
+    <li><a href="#portfolios">Exemples</a></li>
+    <li><a href="#packages">Tarifs</a></li>
+    <li><a href="#order">Commander</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <button class="btn-primary" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Commander</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">✦ Design Discord Professionnel</div>
+  <h1>BANNIÈRES<br><span>DISCORD</span><br>UNIQUES</h1>
+  <p class="hero-sub">Des créations graphiques sur mesure pour votre serveur Discord. Livrées en 48h, prêtes à l'emploi.</p>
+  <div class="hero-cta">
+    <button class="btn-primary" style="padding:14px 36px;font-size:15px;" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Commander maintenant</button>
+    <button class="btn-ghost" onclick="document.getElementById('portfolios').scrollIntoView({behavior:'smooth'})">Voir les exemples →</button>
+  </div>
+
+  <div class="specs">
+    <div class="spec-badge">🕐 <strong>Livraison 48h</strong></div>
+    <div class="spec-badge">🎨 <strong>Format PNG + PSD</strong></div>
+    <div class="spec-badge">↩️ <strong>2 révisions incluses</strong></div>
+    <div class="spec-badge">📐 <strong>960×540px</strong></div>
+    <div class="spec-badge">✅ <strong>Prêt à l'emploi</strong></div>
+  </div>
+</section>
+
+<!-- BANNER PREVIEW STRIP -->
+<div class="preview-strip" id="portfolios">
+  <div class="banner-card">
+    <div class="banner-overlay">GAMING CLAN</div>
+    <span class="banner-tag">Style #1</span>
+  </div>
+  <div class="banner-card">
+    <div class="banner-overlay">ANIME SERVER</div>
+    <span class="banner-tag">Style #2</span>
+  </div>
+  <div class="banner-card">
+    <div class="banner-overlay">COMMUNITY HUB</div>
+    <span class="banner-tag">Style #3</span>
+  </div>
+  <div class="banner-card">
+    <div class="banner-overlay">ESPORT TEAM</div>
+    <span class="banner-tag">Style #4</span>
+  </div>
+  <div class="banner-card">
+    <div class="banner-overlay">TECH SERVER</div>
+    <span class="banner-tag">Style #5</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PACKAGES -->
+<section class="section" id="packages" style="text-align:center;">
+  <div class="section-label">Nos offres</div>
+  <h2>CHOISISSEZ<br>VOTRE FORMULE</h2>
+
+  <div class="packages">
+    <!-- Starter -->
+    <div class="package" onclick="selectPackage('Starter', this)">
+      <div class="pkg-icon">⚡</div>
+      <div class="pkg-name">STARTER</div>
+      <div class="pkg-price"><span>€</span>7<span class="unit">.99</span></div>
+      <div class="pkg-desc">Parfait pour débuter avec une bannière simple et efficace.</div>
+      <ul class="pkg-features">
+        <li><span class="check">✓</span> 1 bannière 960×540px</li>
+        <li><span class="check">✓</span> Format PNG livré</li>
+        <li><span class="check">✓</span> 1 révision incluse</li>
+        <li><span class="check">✓</span> Livraison en 48h</li>
+      </ul>
+      <button class="btn-ghost" style="width:100%;border-color:var(--accent);" onclick="selectPackageAndScroll('Starter', this.closest('.package'))">Choisir ce plan</button>
+    </div>
+
+    <!-- Pro -->
+    <div class="package featured" onclick="selectPackage('Pro', this)">
+      <div class="featured-tag">⭐ Populaire</div>
+      <div class="pkg-icon">🚀</div>
+      <div class="pkg-name">PRO</div>
+      <div class="pkg-price"><span>€</span>17<span class="unit">.99</span></div>
+      <div class="pkg-desc">La bannière complète avec animations et fichiers sources.</div>
+      <ul class="pkg-features">
+        <li><span class="check">✓</span> 1 bannière HD + variante</li>
+        <li><span class="check">✓</span> PNG + fichier PSD</li>
+        <li><span class="check">✓</span> 2 révisions incluses</li>
+        <li><span class="check">✓</span> Livraison en 24h</li>
+        <li><span class="check">✓</span> Version animée GIF</li>
+      </ul>
+      <button class="btn-primary" style="width:100%;" onclick="selectPackageAndScroll('Pro', this.closest('.package'))">Choisir ce plan</button>
+    </div>
+
+    <!-- Premium -->
+    <div class="package" onclick="selectPackage('Premium', this)">
+      <div class="pkg-icon">👑</div>
+      <div class="pkg-name">PREMIUM</div>
+      <div class="pkg-price"><span>€</span>34<span class="unit">.99</span></div>
+      <div class="pkg-desc">Pack complet : bannière, avatar et template de bienvenue.</div>
+      <ul class="pkg-features">
+        <li><span class="check">✓</span> Bannière + Avatar + Welcome</li>
+        <li><span class="check">✓</span> Tous formats livrés</li>
+        <li><span class="check">✓</span> Révisions illimitées</li>
+        <li><span class="check">✓</span> Livraison prioritaire 12h</li>
+        <li><span class="check">✓</span> Support Discord dédié</li>
+        <li><span class="check">✓</span> Source PSD incluse</li>
+      </ul>
+      <button class="btn-ghost" style="width:100%;border-color:var(--accent);" onclick="selectPackageAndScroll('Premium', this.closest('.package'))">Choisir ce plan</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ORDER FORM -->
+<section class="section" id="order">
+  <div class="section-label">Passer commande</div>
+  <h2>VOTRE BANNIÈRE<br>SUR MESURE</h2>
+
+  <div class="form-section">
+    <div class="form-note">
+      <span>💬</span>
+      <div>Après votre commande, nous vous contacterons via Discord dans les 2h pour confirmer les détails. Paiement sécurisé par PayPal ou carte bancaire.</div>
+    </div>
+
+    <div id="formWrapper">
+      <form id="orderForm" onsubmit="submitForm(event)">
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Nom / Pseudo Discord *</label>
+            <input type="text" placeholder="ex: ShadowX#1234" required>
+          </div>
+
+          <div class="field">
+            <label>Email de contact *</label>
+            <input type="email" placeholder="votre@email.com" required>
+          </div>
+
+          <div class="field">
+            <label>Formule choisie *</label>
+            <select id="packageSelect" required>
+              <option value="">— Sélectionner —</option>
+              <option value="Starter">⚡ Starter — 7,99€</option>
+              <option value="Pro">🚀 Pro — 17,99€</option>
+              <option value="Premium">👑 Premium — 34,99€</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Style souhaité</label>
+            <select>
+              <option value="">— Style général —</option>
+              <option>Gaming / Esport</option>
+              <option>Anime / Manga</option>
+              <option>Minimaliste</option>
+              <option>Cyberpunk / Futuriste</option>
+              <option>Fantasy / RPG</option>
+              <option>Professionnel / Corporate</option>
+              <option>Autre (précisez ci-dessous)</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>Nom du serveur / texte à afficher *</label>
+            <input type="text" placeholder="ex: Shadow Gaming, Le Nexus, Dark Realms..." required>
+          </div>
+
+          <div class="field full">
+            <label>Couleurs souhaitées</label>
+            <div class="color-row">
+              <div class="color-swatch blue active" onclick="toggleColor(this)" title="Bleu Discord"></div>
+              <div class="color-swatch pink" onclick="toggleColor(this)" title="Rose/Violet"></div>
+              <div class="color-swatch green" onclick="toggleColor(this)" title="Vert"></div>
+              <div class="color-swatch red" onclick="toggleColor(this)" title="Rouge"></div>
+              <div class="color-swatch gold" onclick="toggleColor(this)" title="Or"></div>
+              <div class="color-swatch cyan" onclick="toggleColor(this)" title="Cyan"></div>
+              <input type="text" placeholder="Ou hex personnalisé ex: #FF6B6B" style="flex:1">
+            </div>
+          </div>
+
+          <div class="field full">
+            <label>Description & références</label>
+            <textarea placeholder="Décrivez votre vision : thème, éléments souhaités, images de référence, personnages, liens vers des exemples que vous aimez..."></textarea>
+          </div>
+
+          <div class="field full">
+            <label>Lien image de référence (optionnel)</label>
+            <input type="url" placeholder="https://imgur.com/votre-image ou lien Google Drive">
+          </div>
+
+        </div>
+
+        <br>
+        <button type="submit" class="submit-btn">🎨 Envoyer ma commande →</button>
+      </form>
+    </div>
+
+    <div class="success-msg" id="successMsg">
+      <div class="icon">✅</div>
+      <h3>COMMANDE REÇUE !</h3>
+      <p>Merci pour votre commande ! Nous vous contacterons via Discord ou email dans les <strong>2 prochaines heures</strong> pour confirmer les détails et démarrer la création.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-label">Questions fréquentes</div>
+  <h2>FAQ</h2>
+
+  <div class="faq-list">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Quel est le format de livraison ? <span class="faq-arrow">+</span></div>
+      <div class="faq-a">Nous livrons en PNG haute qualité (960×540px, format officiel Discord). Selon la formule choisie, vous recevez aussi le fichier PSD source et/ou une version GIF animée.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Comment se passe le paiement ? <span class="faq-arrow">+</span></div>
+      <div class="faq-a">Nous acceptons PayPal et carte bancaire. Le paiement s'effectue après validation de votre commande et avant le démarrage du design. Aucun paiement avant confirmation.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Puis-je demander des modifications ? <span class="faq-arrow">+</span></div>
+      <div class="faq-a">Bien sûr ! Selon votre formule, vous disposez de 1 à un nombre illimité de révisions. Nous ne sommes satisfaits que quand vous l'êtes.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Puis-je fournir mon propre logo ou image ? <span class="faq-arrow">+</span></div>
+      <div class="faq-a">Absolument ! Envoyez vos visuels par lien (Imgur, Google Drive) ou directement via Discord après votre commande. Assurez-vous d'avoir les droits sur ces images.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Puis-je commander plusieurs bannières ? <span class="faq-arrow">+</span></div>
+      <div class="faq-a">Oui ! Pour plusieurs bannières, contactez-nous directement sur Discord pour obtenir un devis groupé avec une remise.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">BANNERFORGE</div>
+  <div>Design Discord professionnel — © 2025</div>
+  <div>Made with ♥ pour la communauté</div>
+</footer>
+
+<script>
+  function selectPackage(name, el) {
+    document.querySelectorAll('.package').forEach(p => p.style.outline = 'none');
+    el.style.outline = '2px solid var(--accent)';
+    document.getElementById('packageSelect').value = name;
+  }
+
+  function selectPackageAndScroll(name, el) {
+    selectPackage(name, el);
+    setTimeout(() => {
+      document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }
+
+  function toggleColor(el) {
+    el.classList.toggle('active');
+  }
+
+  function toggleFaq(item) {
+    item.classList.toggle('open');
+  }
+
+  function submitForm(e) {
+    e.preventDefault();
+    document.getElementById('formWrapper').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+  }
+
+  // Stagger banner cards
+  document.querySelectorAll('.banner-card').forEach((card, i) => {
+    card.style.animationDelay = `${i * 0.1}s`;
+  });
+</script>
+</body>
+</html>
