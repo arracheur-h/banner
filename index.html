@@ -4,312 +4,172 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BannerForge — Bannières Discord sur Mesure</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0a0a0f;
     --surface: #12121a;
+    --surface2: #1a1a26;
     --border: #1e1e2e;
     --accent: #5865F2;
     --accent2: #eb459e;
     --accent3: #57F287;
+    --danger: #ed4245;
+    --gold: #f0b232;
     --text: #e8e8f0;
     --muted: #6b6b80;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* BG grid */
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(88,101,242,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(88,101,242,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(88,101,242,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(88,101,242,0.04) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
   }
-
-  .glow-orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    pointer-events: none;
-    z-index: 0;
-  }
+  .glow-orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
   .glow-orb.a { width: 500px; height: 500px; background: rgba(88,101,242,0.12); top: -100px; left: -100px; }
   .glow-orb.b { width: 400px; height: 400px; background: rgba(235,69,158,0.08); bottom: -100px; right: -100px; }
+
+  .page { display: none; }
+  .page.active { display: block; }
 
   nav {
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 18px 48px;
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.9); backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
   }
-
   .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 3px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer;
   }
-
   .nav-links { display: flex; gap: 32px; list-style: none; }
-  .nav-links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; cursor: pointer; }
   .nav-links a:hover { color: var(--text); }
+  .nav-right { display: flex; gap: 12px; align-items: center; }
+  .user-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; color: var(--muted);
+  }
+  .user-badge strong { color: var(--text); }
+  .admin-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
 
   .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.2s;
+    background: var(--accent); color: #fff; border: none;
+    padding: 10px 24px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.2s, transform 0.2s;
   }
   .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
-
-  /* Hero */
-  .hero {
-    position: relative; z-index: 1;
-    text-align: center;
-    padding: 120px 48px 80px;
-  }
-
-  .hero-tag {
-    display: inline-block;
-    background: rgba(88,101,242,0.15);
-    border: 1px solid rgba(88,101,242,0.3);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 6px 16px;
-    border-radius: 99px;
-    margin-bottom: 28px;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(60px, 10vw, 120px);
-    line-height: 0.95;
-    letter-spacing: 4px;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-
-  h1 span {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .hero-sub {
-    max-width: 520px;
-    margin: 24px auto 48px;
-    font-size: 17px;
-    font-weight: 300;
-    color: var(--muted);
-    line-height: 1.7;
-    animation: fadeUp 0.6s 0.2s ease both;
-  }
-
-  .hero-cta {
-    display: flex; gap: 16px; justify-content: center;
-    animation: fadeUp 0.6s 0.3s ease both;
-  }
-
   .btn-ghost {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 12px 28px;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    background: transparent; color: var(--text); border: 1px solid var(--border);
+    padding: 10px 24px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: border-color 0.2s, background 0.2s;
   }
   .btn-ghost:hover { border-color: var(--accent); background: rgba(88,101,242,0.08); }
 
-  /* Showcase banners preview */
-  .preview-strip {
-    position: relative; z-index: 1;
-    display: flex; gap: 12px;
-    padding: 0 48px 80px;
-    overflow-x: auto;
-    scrollbar-width: none;
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
   }
-  .preview-strip::-webkit-scrollbar { display: none; }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 48px; width: 420px; max-width: 95vw;
+    position: relative; animation: popIn 0.3s ease;
+  }
+  @keyframes popIn { from { opacity:0; transform:scale(0.92) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; transition: color 0.2s; }
+  .modal-close:hover { color: var(--text); }
+  .modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 3px; margin-bottom: 8px; }
+  .modal-sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  .mfield { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .mfield label { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .mfield input {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 12px 16px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .mfield input:focus { border-color: var(--accent); }
+  .modal-err { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+  .modal-tabs { display: flex; gap: 4px; margin-bottom: 28px; }
+  .modal-tab {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s;
+  }
+  .modal-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .submit-full {
+    width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; border: none; padding: 14px; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; margin-top: 8px;
+  }
+  .submit-full:hover { opacity: 0.9; }
 
-  .banner-card {
-    flex: 0 0 340px;
-    height: 120px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.3s, border-color 0.3s;
-    animation: fadeUp 0.5s ease both;
+  /* HERO */
+  .hero { position: relative; z-index: 1; text-align: center; padding: 120px 48px 80px; }
+  .hero-tag {
+    display: inline-block; background: rgba(88,101,242,0.15); border: 1px solid rgba(88,101,242,0.3);
+    color: var(--accent); font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 99px; margin-bottom: 28px; animation: fadeUp 0.6s ease both;
   }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(60px, 10vw, 120px); line-height: 0.95; letter-spacing: 4px; animation: fadeUp 0.6s 0.1s ease both; }
+  h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { max-width: 520px; margin: 24px auto 48px; font-size: 17px; font-weight: 300; color: var(--muted); line-height: 1.7; animation: fadeUp 0.6s 0.2s ease both; }
+  .hero-cta { display: flex; gap: 16px; justify-content: center; animation: fadeUp 0.6s 0.3s ease both; }
+  .specs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; justify-content: center; }
+  .spec-badge { background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 6px 14px; border-radius: 99px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .spec-badge strong { color: var(--text); }
+
+  .preview-strip { position: relative; z-index: 1; display: flex; gap: 12px; padding: 0 48px 80px; overflow-x: auto; scrollbar-width: none; }
+  .preview-strip::-webkit-scrollbar { display: none; }
+  .banner-card { flex: 0 0 340px; height: 120px; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; position: relative; cursor: pointer; transition: transform 0.3s, border-color 0.3s; animation: fadeUp 0.5s ease both; }
   .banner-card:hover { transform: translateY(-4px) scale(1.02); border-color: var(--accent); }
   .banner-card:nth-child(1) { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
   .banner-card:nth-child(2) { background: linear-gradient(135deg, #0d0d0d, #1a0a2e, #2d1b69); }
   .banner-card:nth-child(3) { background: linear-gradient(135deg, #0a0a0a, #1e3a2e, #0d4a2e); }
   .banner-card:nth-child(4) { background: linear-gradient(135deg, #1a0000, #3d0000, #7b0000); }
   .banner-card:nth-child(5) { background: linear-gradient(135deg, #0a0a1a, #0d1b4a, #1a3a8a); }
+  .banner-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 4px; color: rgba(255,255,255,0.8); text-shadow: 0 0 30px rgba(88,101,242,0.8); }
+  .banner-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 99px; color: var(--muted); }
 
-  .banner-overlay {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.2);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 4px;
-    color: rgba(255,255,255,0.8);
-    text-shadow: 0 0 30px rgba(88,101,242,0.8);
-  }
-
-  .banner-tag {
-    position: absolute; top: 10px; right: 10px;
-    font-size: 10px; font-weight: 500; letter-spacing: 1px;
-    text-transform: uppercase;
-    background: rgba(0,0,0,0.5);
-    padding: 4px 10px; border-radius: 99px;
-    color: var(--muted);
-  }
-
-  /* Section */
   .section { position: relative; z-index: 1; padding: 80px 48px; }
-  .section-label {
-    font-size: 11px; font-weight: 500; letter-spacing: 3px;
-    text-transform: uppercase; color: var(--accent);
-    margin-bottom: 16px;
-  }
-  .section h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(36px, 5vw, 56px);
-    letter-spacing: 3px;
-    margin-bottom: 48px;
-  }
+  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .section h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 5vw, 56px); letter-spacing: 3px; margin-bottom: 48px; }
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0 48px; }
 
-  /* Packages */
-  .packages {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .package {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 36px;
-    position: relative;
-    transition: border-color 0.3s, transform 0.3s;
-    cursor: pointer;
-  }
+  /* PACKAGES */
+  .packages { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 760px; margin: 0 auto; }
+  .package { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px; position: relative; transition: border-color 0.3s, transform 0.3s; cursor: pointer; }
   .package:hover { border-color: var(--accent); transform: translateY(-4px); }
-  .package.featured {
-    border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(88,101,242,0.1), rgba(235,69,158,0.05));
-  }
-
-  .featured-tag {
-    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; padding: 5px 16px; border-radius: 99px;
-    white-space: nowrap;
-  }
-
+  .package.featured { border-color: var(--accent); background: linear-gradient(135deg, rgba(88,101,242,0.1), rgba(235,69,158,0.05)); }
+  .featured-tag { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent2)); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 5px 16px; border-radius: 99px; white-space: nowrap; color: #fff; }
   .pkg-icon { font-size: 32px; margin-bottom: 16px; }
   .pkg-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; margin-bottom: 8px; }
-  .pkg-price {
-    font-size: 42px; font-weight: 300;
-    margin-bottom: 8px;
-  }
-  .pkg-price span { font-size: 18px; color: var(--muted); vertical-align: top; margin-top: 8px; display: inline-block; }
-  .pkg-price .unit { font-size: 14px; vertical-align: baseline; margin-top: 0; }
+  .pkg-price { font-size: 42px; font-weight: 300; margin-bottom: 8px; }
+  .pkg-price .eur { font-size: 18px; color: var(--muted); vertical-align: top; margin-top: 8px; display: inline-block; }
+  .pkg-price .cents { font-size: 14px; }
   .pkg-desc { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
-
   .pkg-features { list-style: none; margin-bottom: 32px; }
-  .pkg-features li {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 14px; padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-  }
+  .pkg-features li { display: flex; align-items: center; gap: 10px; font-size: 14px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
   .pkg-features li:last-child { border-bottom: none; }
-  .check { color: var(--accent3); font-size: 16px; }
+  .check { color: var(--accent3); }
 
-  /* Order Form */
-  .form-section {
-    max-width: 760px;
-    margin: 0 auto;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  .form-grid .full { grid-column: 1 / -1; }
-
+  /* FORM */
+  .form-section { max-width: 760px; margin: 0 auto; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .form-grid .full { grid-column: 1/-1; }
   .field { display: flex; flex-direction: column; gap: 8px; }
-  label { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0.5px; }
-
-  input, textarea, select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 14px 16px;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
+  label { font-size: 13px; font-weight: 500; color: var(--muted); }
+  input, textarea, select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 14px 16px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%; }
   input:focus, textarea:focus, select:focus { border-color: var(--accent); }
   textarea { min-height: 120px; resize: vertical; }
   select option { background: var(--surface); }
-
   .color-row { display: flex; gap: 12px; align-items: center; }
-  .color-swatch {
-    width: 44px; height: 44px; border-radius: 8px;
-    border: 2px solid var(--border);
-    cursor: pointer;
-    transition: transform 0.2s, border-color 0.2s;
-    flex-shrink: 0;
-  }
+  .color-swatch { width: 44px; height: 44px; border-radius: 8px; border: 2px solid var(--border); cursor: pointer; transition: transform 0.2s, border-color 0.2s; flex-shrink: 0; }
   .color-swatch:hover, .color-swatch.active { transform: scale(1.1); border-color: var(--accent); }
   .color-swatch.blue { background: linear-gradient(135deg, #5865F2, #4752C4); }
   .color-swatch.pink { background: linear-gradient(135deg, #eb459e, #c0366d); }
@@ -317,102 +177,80 @@
   .color-swatch.red { background: linear-gradient(135deg, #ed4245, #c73235); }
   .color-swatch.gold { background: linear-gradient(135deg, #f0b232, #c48a15); }
   .color-swatch.cyan { background: linear-gradient(135deg, #00d4ff, #0096b3); }
-
-  .form-note {
-    background: rgba(88,101,242,0.08);
-    border: 1px solid rgba(88,101,242,0.2);
-    border-radius: 10px;
-    padding: 16px;
-    font-size: 13px;
-    color: var(--muted);
-    display: flex; align-items: flex-start; gap: 10px;
-    margin-bottom: 24px;
-  }
-
-  .submit-btn {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    border: none;
-    padding: 16px;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.2s;
-    letter-spacing: 0.5px;
-  }
+  .form-note { background: rgba(88,101,242,0.08); border: 1px solid rgba(88,101,242,0.2); border-radius: 10px; padding: 16px; font-size: 13px; color: var(--muted); display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px; }
+  .submit-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; padding: 16px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.2s; }
   .submit-btn:hover { opacity: 0.9; transform: translateY(-2px); }
-
-  /* Success state */
-  .success-msg {
-    display: none;
-    text-align: center;
-    padding: 60px 0;
-    animation: fadeUp 0.5s ease;
-  }
+  .success-msg { display: none; text-align: center; padding: 60px 0; animation: fadeUp 0.5s ease; }
   .success-msg .icon { font-size: 64px; margin-bottom: 20px; }
   .success-msg h3 { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 3px; color: var(--accent3); margin-bottom: 12px; }
   .success-msg p { color: var(--muted); font-size: 15px; }
 
   /* FAQ */
   .faq-list { max-width: 700px; }
-  .faq-item {
-    border-bottom: 1px solid var(--border);
-    padding: 24px 0;
-    cursor: pointer;
-  }
-  .faq-q {
-    display: flex; justify-content: space-between; align-items: center;
-    font-weight: 500; font-size: 15px;
-  }
+  .faq-item { border-bottom: 1px solid var(--border); padding: 24px 0; cursor: pointer; }
+  .faq-q { display: flex; justify-content: space-between; align-items: center; font-weight: 500; font-size: 15px; }
   .faq-arrow { color: var(--accent); font-size: 20px; transition: transform 0.3s; }
   .faq-item.open .faq-arrow { transform: rotate(45deg); }
-  .faq-a {
-    max-height: 0; overflow: hidden;
-    font-size: 14px; color: var(--muted); line-height: 1.7;
-    transition: max-height 0.3s ease, padding 0.3s;
-  }
+  .faq-a { max-height: 0; overflow: hidden; font-size: 14px; color: var(--muted); line-height: 1.7; transition: max-height 0.3s ease, padding 0.3s; }
   .faq-item.open .faq-a { max-height: 200px; padding-top: 16px; }
 
-  /* Footer */
-  footer {
-    position: relative; z-index: 1;
-    border-top: 1px solid var(--border);
-    padding: 40px 48px;
-    display: flex; justify-content: space-between; align-items: center;
-    color: var(--muted); font-size: 13px;
-  }
-  .footer-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; letter-spacing: 3px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
+  /* ADMIN */
+  .admin-layout { display: flex; min-height: calc(100vh - 73px); }
+  .admin-sidebar { width: 240px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); padding: 32px 0; position: sticky; top: 73px; height: calc(100vh - 73px); }
+  .sidebar-title { font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); padding: 0 24px 16px; }
+  .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+  .sidebar-link:hover, .sidebar-link.active { color: var(--text); background: rgba(88,101,242,0.08); border-left-color: var(--accent); }
+  .admin-content { flex: 1; padding: 40px 48px; }
+  .admin-header { margin-bottom: 36px; }
+  .admin-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 3px; }
+  .admin-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; position: relative; overflow: hidden; }
+  .stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; }
+  .stat-card.sc-blue::after { background: var(--accent); }
+  .stat-card.sc-gold::after { background: var(--gold); }
+  .stat-card.sc-pink::after { background: var(--accent2); }
+  .stat-card.sc-green::after { background: var(--accent3); }
+  .stat-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 2px; }
+  .sv-blue { color: var(--accent); } .sv-gold { color: var(--gold); } .sv-pink { color: var(--accent2); } .sv-green { color: var(--accent3); }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  .orders-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .table-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .table-header h3 { font-size: 16px; font-weight: 600; }
+  .table-search input { padding: 8px 14px; width: 220px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: rgba(255,255,255,0.03); padding: 14px 16px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  td { padding: 16px; font-size: 14px; border-top: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 1px; }
+  .b-starter { background: rgba(88,101,242,0.15); color: var(--accent); }
+  .b-pro { background: rgba(235,69,158,0.15); color: var(--accent2); }
+  .b-pending { background: rgba(240,178,50,0.15); color: var(--gold); }
+  .b-progress { background: rgba(88,101,242,0.15); color: var(--accent); }
+  .b-done { background: rgba(87,242,135,0.15); color: var(--accent3); }
+  .b-cancelled { background: rgba(237,66,69,0.15); color: var(--danger); }
+  .order-detail-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .order-detail-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .admin-view { display: none; }
+  .admin-view.active { display: block; }
 
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border), transparent);
-    margin: 0 48px;
-  }
+  /* ORDER DETAIL MODAL */
+  .order-detail-modal { max-width: 560px; max-height: 90vh; overflow-y: auto; }
+  .detail-row { display: flex; gap: 16px; margin-bottom: 16px; }
+  .detail-field { flex: 1; }
+  .detail-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .detail-val { font-size: 14px; color: var(--text); background: var(--bg); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); }
+  .status-select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; width: 100%; }
+  .btn-danger { background: var(--danger); color: #fff; border: none; padding: 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: opacity 0.2s; width: 100%; }
+  .btn-danger:hover { opacity: 0.8; }
 
-  /* Specs badges */
-  .specs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
-  .spec-badge {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    padding: 6px 14px; border-radius: 99px;
-    font-size: 12px; color: var(--muted);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .spec-badge strong { color: var(--text); }
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 13px; }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
   @media (max-width: 768px) {
     nav { padding: 16px 20px; }
@@ -420,294 +258,490 @@
     .hero { padding: 80px 20px 60px; }
     .section { padding: 60px 20px; }
     .preview-strip { padding: 0 20px 60px; }
-    footer { padding: 30px 20px; flex-direction: column; gap: 16px; text-align: center; }
+    footer { padding: 30px 20px; flex-direction: column; gap: 12px; text-align: center; }
     .form-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .admin-sidebar { display: none; }
+    .admin-content { padding: 24px 16px; }
   }
 </style>
 </head>
 <body>
-
 <div class="glow-orb a"></div>
 <div class="glow-orb b"></div>
 
-<!-- NAV -->
-<nav>
-  <div class="logo">BANNERFORGE</div>
-  <ul class="nav-links">
-    <li><a href="#portfolios">Exemples</a></li>
-    <li><a href="#packages">Tarifs</a></li>
-    <li><a href="#order">Commander</a></li>
-    <li><a href="#faq">FAQ</a></li>
-  </ul>
-  <button class="btn-primary" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Commander</button>
-</nav>
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <h2>CONNEXION</h2>
+    <p class="modal-sub">Accédez à votre espace ou créez un compte.</p>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Se connecter</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchTab('register')">S'inscrire</button>
+    </div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-tag">✦ Design Discord Professionnel</div>
-  <h1>BANNIÈRES<br><span>DISCORD</span><br>UNIQUES</h1>
-  <p class="hero-sub">Des créations graphiques sur mesure pour votre serveur Discord. Livrées en 48h, prêtes à l'emploi.</p>
-  <div class="hero-cta">
-    <button class="btn-primary" style="padding:14px 36px;font-size:15px;" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Commander maintenant</button>
-    <button class="btn-ghost" onclick="document.getElementById('portfolios').scrollIntoView({behavior:'smooth'})">Voir les exemples →</button>
-  </div>
+    <div id="loginForm">
+      <div class="mfield"><label>Nom d'utilisateur</label><input type="text" id="loginUser" placeholder="Votre pseudo"></div>
+      <div class="mfield"><label>Mot de passe</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="modal-err" id="loginErr">Identifiants incorrects.</div>
+      <button class="submit-full" onclick="doLogin()">Connexion →</button>
+    </div>
 
-  <div class="specs">
-    <div class="spec-badge">🕐 <strong>Livraison 48h</strong></div>
-    <div class="spec-badge">🎨 <strong>Format PNG + PSD</strong></div>
-    <div class="spec-badge">↩️ <strong>2 révisions incluses</strong></div>
-    <div class="spec-badge">📐 <strong>960×540px</strong></div>
-    <div class="spec-badge">✅ <strong>Prêt à l'emploi</strong></div>
-  </div>
-</section>
-
-<!-- BANNER PREVIEW STRIP -->
-<div class="preview-strip" id="portfolios">
-  <div class="banner-card">
-    <div class="banner-overlay">GAMING CLAN</div>
-    <span class="banner-tag">Style #1</span>
-  </div>
-  <div class="banner-card">
-    <div class="banner-overlay">ANIME SERVER</div>
-    <span class="banner-tag">Style #2</span>
-  </div>
-  <div class="banner-card">
-    <div class="banner-overlay">COMMUNITY HUB</div>
-    <span class="banner-tag">Style #3</span>
-  </div>
-  <div class="banner-card">
-    <div class="banner-overlay">ESPORT TEAM</div>
-    <span class="banner-tag">Style #4</span>
-  </div>
-  <div class="banner-card">
-    <div class="banner-overlay">TECH SERVER</div>
-    <span class="banner-tag">Style #5</span>
+    <div id="registerForm" style="display:none;">
+      <div class="mfield"><label>Pseudo Discord *</label><input type="text" id="regUser" placeholder="ex: ShadowX"></div>
+      <div class="mfield"><label>Email *</label><input type="email" id="regEmail" placeholder="votre@email.com"></div>
+      <div class="mfield"><label>Mot de passe * (6+ caractères)</label><input type="password" id="regPass" placeholder="••••••••"></div>
+      <div class="modal-err" id="regErr">Erreur lors de l'inscription.</div>
+      <button class="submit-full" onclick="doRegister()">Créer mon compte →</button>
+    </div>
   </div>
 </div>
 
-<div class="divider"></div>
-
-<!-- PACKAGES -->
-<section class="section" id="packages" style="text-align:center;">
-  <div class="section-label">Nos offres</div>
-  <h2>CHOISISSEZ<br>VOTRE FORMULE</h2>
-
-  <div class="packages">
-    <!-- Starter -->
-    <div class="package" onclick="selectPackage('Starter', this)">
-      <div class="pkg-icon">⚡</div>
-      <div class="pkg-name">STARTER</div>
-      <div class="pkg-price"><span>€</span>7<span class="unit">.99</span></div>
-      <div class="pkg-desc">Parfait pour débuter avec une bannière simple et efficace.</div>
-      <ul class="pkg-features">
-        <li><span class="check">✓</span> 1 bannière 960×540px</li>
-        <li><span class="check">✓</span> Format PNG livré</li>
-        <li><span class="check">✓</span> 1 révision incluse</li>
-        <li><span class="check">✓</span> Livraison en 48h</li>
-      </ul>
-      <button class="btn-ghost" style="width:100%;border-color:var(--accent);" onclick="selectPackageAndScroll('Starter', this.closest('.package'))">Choisir ce plan</button>
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="orderDetailModal">
+  <div class="modal order-detail-modal">
+    <button class="modal-close" onclick="closeOrderDetail()">✕</button>
+    <h2 style="margin-bottom:4px;">COMMANDE</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:28px;" id="detailId"></p>
+    <div class="detail-row">
+      <div class="detail-field"><div class="detail-label">Client</div><div class="detail-val" id="dUser">—</div></div>
+      <div class="detail-field"><div class="detail-label">Email</div><div class="detail-val" id="dEmail">—</div></div>
     </div>
-
-    <!-- Pro -->
-    <div class="package featured" onclick="selectPackage('Pro', this)">
-      <div class="featured-tag">⭐ Populaire</div>
-      <div class="pkg-icon">🚀</div>
-      <div class="pkg-name">PRO</div>
-      <div class="pkg-price"><span>€</span>17<span class="unit">.99</span></div>
-      <div class="pkg-desc">La bannière complète avec animations et fichiers sources.</div>
-      <ul class="pkg-features">
-        <li><span class="check">✓</span> 1 bannière HD + variante</li>
-        <li><span class="check">✓</span> PNG + fichier PSD</li>
-        <li><span class="check">✓</span> 2 révisions incluses</li>
-        <li><span class="check">✓</span> Livraison en 24h</li>
-        <li><span class="check">✓</span> Version animée GIF</li>
-      </ul>
-      <button class="btn-primary" style="width:100%;" onclick="selectPackageAndScroll('Pro', this.closest('.package'))">Choisir ce plan</button>
+    <div class="detail-row">
+      <div class="detail-field"><div class="detail-label">Formule</div><div class="detail-val" id="dPkg">—</div></div>
+      <div class="detail-field"><div class="detail-label">Prix</div><div class="detail-val" id="dPrice">—</div></div>
     </div>
-
-    <!-- Premium -->
-    <div class="package" onclick="selectPackage('Premium', this)">
-      <div class="pkg-icon">👑</div>
-      <div class="pkg-name">PREMIUM</div>
-      <div class="pkg-price"><span>€</span>34<span class="unit">.99</span></div>
-      <div class="pkg-desc">Pack complet : bannière, avatar et template de bienvenue.</div>
-      <ul class="pkg-features">
-        <li><span class="check">✓</span> Bannière + Avatar + Welcome</li>
-        <li><span class="check">✓</span> Tous formats livrés</li>
-        <li><span class="check">✓</span> Révisions illimitées</li>
-        <li><span class="check">✓</span> Livraison prioritaire 12h</li>
-        <li><span class="check">✓</span> Support Discord dédié</li>
-        <li><span class="check">✓</span> Source PSD incluse</li>
-      </ul>
-      <button class="btn-ghost" style="width:100%;border-color:var(--accent);" onclick="selectPackageAndScroll('Premium', this.closest('.package'))">Choisir ce plan</button>
+    <div class="detail-row">
+      <div class="detail-field"><div class="detail-label">Style</div><div class="detail-val" id="dStyle">—</div></div>
+      <div class="detail-field"><div class="detail-label">Date</div><div class="detail-val" id="dDate">—</div></div>
     </div>
+    <div style="margin-bottom:16px;"><div class="detail-label" style="margin-bottom:6px;">Nom du serveur</div><div class="detail-val" id="dServer">—</div></div>
+    <div style="margin-bottom:16px;"><div class="detail-label" style="margin-bottom:6px;">Description</div><div class="detail-val" id="dDesc" style="white-space:pre-wrap;min-height:60px;">—</div></div>
+    <div style="margin-bottom:24px;">
+      <div class="detail-label" style="margin-bottom:6px;">Statut</div>
+      <select class="status-select" id="dStatus" onchange="updateOrderStatus()">
+        <option value="pending">⏳ En attente</option>
+        <option value="progress">🎨 En cours</option>
+        <option value="done">✅ Terminé</option>
+        <option value="cancelled">❌ Annulé</option>
+      </select>
+    </div>
+    <button class="btn-danger" onclick="deleteOrder()">🗑 Supprimer cette commande</button>
   </div>
-</section>
+</div>
 
-<div class="divider"></div>
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="showPage('home')">BANNERFORGE</div>
+  <ul class="nav-links">
+    <li><a onclick="goTo('portfolios')">Exemples</a></li>
+    <li><a onclick="goTo('packages')">Tarifs</a></li>
+    <li><a onclick="goTo('order')">Commander</a></li>
+    <li><a onclick="goTo('faq')">FAQ</a></li>
+  </ul>
+  <div class="nav-right" id="navRight"></div>
+</nav>
 
-<!-- ORDER FORM -->
-<section class="section" id="order">
-  <div class="section-label">Passer commande</div>
-  <h2>VOTRE BANNIÈRE<br>SUR MESURE</h2>
+<!-- HOME PAGE -->
+<div class="page active" id="homePage">
 
-  <div class="form-section">
-    <div class="form-note">
-      <span>💬</span>
-      <div>Après votre commande, nous vous contacterons via Discord dans les 2h pour confirmer les détails. Paiement sécurisé par PayPal ou carte bancaire.</div>
+  <section class="hero">
+    <div class="hero-tag">✦ Design Discord Professionnel</div>
+    <h1>BANNIÈRES<br><span>DISCORD</span><br>UNIQUES</h1>
+    <p class="hero-sub">Des créations graphiques sur mesure pour votre serveur Discord. Livrées en 48h, prêtes à l'emploi.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" style="padding:14px 36px;font-size:15px;" onclick="goTo('order')">Commander maintenant</button>
+      <button class="btn-ghost" onclick="goTo('portfolios')">Voir les exemples →</button>
     </div>
+    <div class="specs">
+      <div class="spec-badge">🕐 <strong>Livraison 48h</strong></div>
+      <div class="spec-badge">🎨 <strong>Format PNG + PSD</strong></div>
+      <div class="spec-badge">↩️ <strong>Révisions incluses</strong></div>
+      <div class="spec-badge">📐 <strong>1500×500px</strong></div>
+      <div class="spec-badge">✅ <strong>Prêt à l'emploi</strong></div>
+    </div>
+  </section>
 
-    <div id="formWrapper">
-      <form id="orderForm" onsubmit="submitForm(event)">
-        <div class="form-grid">
+  <div class="preview-strip" id="portfolios">
+    <div class="banner-card"><div class="banner-overlay">GAMING CLAN</div><span class="banner-tag">Style #1</span></div>
+    <div class="banner-card"><div class="banner-overlay">ANIME SERVER</div><span class="banner-tag">Style #2</span></div>
+    <div class="banner-card"><div class="banner-overlay">COMMUNITY HUB</div><span class="banner-tag">Style #3</span></div>
+    <div class="banner-card"><div class="banner-overlay">ESPORT TEAM</div><span class="banner-tag">Style #4</span></div>
+    <div class="banner-card"><div class="banner-overlay">TECH SERVER</div><span class="banner-tag">Style #5</span></div>
+  </div>
 
-          <div class="field">
-            <label>Nom / Pseudo Discord *</label>
-            <input type="text" placeholder="ex: ShadowX#1234" required>
-          </div>
+  <div class="divider"></div>
 
-          <div class="field">
-            <label>Email de contact *</label>
-            <input type="email" placeholder="votre@email.com" required>
-          </div>
+  <section class="section" id="packages" style="text-align:center;">
+    <div class="section-label">Nos offres</div>
+    <h2>CHOISISSEZ<br>VOTRE FORMULE</h2>
+    <div class="packages">
 
-          <div class="field">
-            <label>Formule choisie *</label>
-            <select id="packageSelect" required>
-              <option value="">— Sélectionner —</option>
-              <option value="Starter">⚡ Starter — 7,99€</option>
-              <option value="Pro">🚀 Pro — 17,99€</option>
-              <option value="Premium">👑 Premium — 34,99€</option>
-            </select>
-          </div>
+      <div class="package" id="pkgStarter">
+        <div class="pkg-icon">⚡</div>
+        <div class="pkg-name">STARTER</div>
+        <div class="pkg-price"><span class="eur">€</span>5<span class="cents">.99</span></div>
+        <div class="pkg-desc">Parfait pour débuter avec une bannière simple et propre.</div>
+        <ul class="pkg-features">
+          <li><span class="check">✓</span> 1 bannière 1500×500px</li>
+          <li><span class="check">✓</span> Format PNG livré</li>
+          <li><span class="check">✓</span> 1 révision incluse</li>
+          <li><span class="check">✓</span> Livraison en 48h</li>
+        </ul>
+        <button class="btn-ghost" style="width:100%;border-color:var(--accent);" onclick="pickPkg('Starter')">Choisir ce plan</button>
+      </div>
 
-          <div class="field">
-            <label>Style souhaité</label>
-            <select>
-              <option value="">— Style général —</option>
-              <option>Gaming / Esport</option>
-              <option>Anime / Manga</option>
-              <option>Minimaliste</option>
-              <option>Cyberpunk / Futuriste</option>
-              <option>Fantasy / RPG</option>
-              <option>Professionnel / Corporate</option>
-              <option>Autre (précisez ci-dessous)</option>
-            </select>
-          </div>
+      <div class="package featured" id="pkgPro">
+        <div class="featured-tag">⭐ Populaire</div>
+        <div class="pkg-icon">🚀</div>
+        <div class="pkg-name">PRO</div>
+        <div class="pkg-price"><span class="eur">€</span>12<span class="cents">.99</span></div>
+        <div class="pkg-desc">La bannière complète avec animations et fichiers sources.</div>
+        <ul class="pkg-features">
+          <li><span class="check">✓</span> 1 bannière HD + variante</li>
+          <li><span class="check">✓</span> PNG + fichier PSD</li>
+          <li><span class="check">✓</span> 2 révisions incluses</li>
+          <li><span class="check">✓</span> Livraison en 24h</li>
+          <li><span class="check">✓</span> Version animée GIF</li>
+        </ul>
+        <button class="btn-primary" style="width:100%;" onclick="pickPkg('Pro')">Choisir ce plan</button>
+      </div>
 
-          <div class="field full">
-            <label>Nom du serveur / texte à afficher *</label>
-            <input type="text" placeholder="ex: Shadow Gaming, Le Nexus, Dark Realms..." required>
-          </div>
+    </div>
+  </section>
 
-          <div class="field full">
-            <label>Couleurs souhaitées</label>
-            <div class="color-row">
-              <div class="color-swatch blue active" onclick="toggleColor(this)" title="Bleu Discord"></div>
-              <div class="color-swatch pink" onclick="toggleColor(this)" title="Rose/Violet"></div>
-              <div class="color-swatch green" onclick="toggleColor(this)" title="Vert"></div>
-              <div class="color-swatch red" onclick="toggleColor(this)" title="Rouge"></div>
-              <div class="color-swatch gold" onclick="toggleColor(this)" title="Or"></div>
-              <div class="color-swatch cyan" onclick="toggleColor(this)" title="Cyan"></div>
-              <input type="text" placeholder="Ou hex personnalisé ex: #FF6B6B" style="flex:1">
+  <div class="divider"></div>
+
+  <section class="section" id="order">
+    <div class="section-label">Passer commande</div>
+    <h2>VOTRE BANNIÈRE<br>SUR MESURE</h2>
+    <div class="form-section">
+      <div class="form-note"><span>💬</span><div>Après votre commande, nous vous contacterons via Discord dans les 2h pour confirmer les détails.</div></div>
+      <div id="formWrapper">
+        <form id="orderForm" onsubmit="submitOrder(event)">
+          <div class="form-grid">
+            <div class="field"><label>Nom / Pseudo Discord *</label><input type="text" id="oUser" placeholder="ex: ShadowX#1234" required></div>
+            <div class="field"><label>Email de contact *</label><input type="email" id="oEmail" placeholder="votre@email.com" required></div>
+            <div class="field"><label>Formule choisie *</label>
+              <select id="packageSelect" required>
+                <option value="">— Sélectionner —</option>
+                <option value="Starter">⚡ Starter — 5,99€</option>
+                <option value="Pro">🚀 Pro — 12,99€</option>
+              </select>
             </div>
+            <div class="field"><label>Style souhaité</label>
+              <select id="oStyle">
+                <option value="">— Style général —</option>
+                <option>Gaming / Esport</option>
+                <option>Anime / Manga</option>
+                <option>Minimaliste</option>
+                <option>Cyberpunk / Futuriste</option>
+                <option>Fantasy / RPG</option>
+                <option>Professionnel / Corporate</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field full"><label>Nom du serveur / texte à afficher *</label><input type="text" id="oServer" placeholder="ex: Shadow Gaming, Le Nexus..." required></div>
+            <div class="field full"><label>Couleurs souhaitées</label>
+              <div class="color-row">
+                <div class="color-swatch blue active" onclick="toggleColor(this)"></div>
+                <div class="color-swatch pink" onclick="toggleColor(this)"></div>
+                <div class="color-swatch green" onclick="toggleColor(this)"></div>
+                <div class="color-swatch red" onclick="toggleColor(this)"></div>
+                <div class="color-swatch gold" onclick="toggleColor(this)"></div>
+                <div class="color-swatch cyan" onclick="toggleColor(this)"></div>
+                <input type="text" id="oColorCustom" placeholder="Hex: #FF6B6B" style="flex:1">
+              </div>
+            </div>
+            <div class="field full"><label>Description & références</label><textarea id="oDesc" placeholder="Décrivez votre vision : thème, éléments, personnages, exemples..."></textarea></div>
           </div>
+          <br>
+          <button type="submit" class="submit-btn">🎨 Envoyer ma commande →</button>
+        </form>
+      </div>
+      <div class="success-msg" id="successMsg">
+        <div class="icon">✅</div>
+        <h3>COMMANDE REÇUE !</h3>
+        <p>Merci ! Nous vous contacterons dans les <strong>2 prochaines heures</strong> pour confirmer et démarrer.</p>
+      </div>
+    </div>
+  </section>
 
-          <div class="field full">
-            <label>Description & références</label>
-            <textarea placeholder="Décrivez votre vision : thème, éléments souhaités, images de référence, personnages, liens vers des exemples que vous aimez..."></textarea>
-          </div>
+  <div class="divider"></div>
 
-          <div class="field full">
-            <label>Lien image de référence (optionnel)</label>
-            <input type="url" placeholder="https://imgur.com/votre-image ou lien Google Drive">
-          </div>
+  <section class="section" id="faq">
+    <div class="section-label">Questions fréquentes</div>
+    <h2>FAQ</h2>
+    <div class="faq-list">
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Quel est le format de livraison ? <span class="faq-arrow">+</span></div><div class="faq-a">PNG haute qualité (960×540px). Selon la formule, vous recevez aussi le PSD source et/ou une version GIF animée.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Comment se passe le paiement ? <span class="faq-arrow">+</span></div><div class="faq-a">PayPal et carte bancaire acceptés. Le paiement s'effectue après validation, avant démarrage du design.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Puis-je demander des modifications ? <span class="faq-arrow">+</span></div><div class="faq-a">Oui ! 1 révision en Starter, 2 révisions en Pro. Satisfaction garantie.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Puis-je fournir mon propre logo ? <span class="faq-arrow">+</span></div><div class="faq-a">Absolument ! Envoyez vos visuels via lien (Imgur, Drive) ou directement par Discord après commande.</div></div>
+    </div>
+  </section>
 
+  <footer>
+    <div class="footer-logo">BANNERFORGE</div>
+    <div>Design Discord professionnel — © 2025</div>
+    <div>Made with ♥ pour la communauté</div>
+  </footer>
+
+</div><!-- end homePage -->
+
+<!-- ADMIN PAGE -->
+<div class="page" id="adminPage">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="sidebar-title">Administration</div>
+      <div class="sidebar-link active" onclick="switchAdmin('dashboard',this)"><span>📊</span> Dashboard</div>
+      <div class="sidebar-link" onclick="switchAdmin('orders',this)"><span>📋</span> Commandes</div>
+      <div class="sidebar-link" onclick="switchAdmin('users',this)"><span>👥</span> Utilisateurs</div>
+      <div class="sidebar-link" style="margin-top:32px;" onclick="logout()"><span>🚪</span> Déconnexion</div>
+    </aside>
+    <main class="admin-content">
+
+      <!-- DASHBOARD -->
+      <div class="admin-view active" id="viewDashboard">
+        <div class="admin-header"><h2>TABLEAU DE BORD</h2><p>Bienvenue, <strong>3xt4sy</strong> 👑 — Espace administrateur</p></div>
+        <div class="stats-grid">
+          <div class="stat-card sc-blue"><div class="stat-label">Total commandes</div><div class="stat-val sv-blue" id="statTotal">0</div></div>
+          <div class="stat-card sc-gold"><div class="stat-label">En attente</div><div class="stat-val sv-gold" id="statPending">0</div></div>
+          <div class="stat-card sc-pink"><div class="stat-label">En cours</div><div class="stat-val sv-pink" id="statProgress">0</div></div>
+          <div class="stat-card sc-green"><div class="stat-label">Terminées</div><div class="stat-val sv-green" id="statDone">0</div></div>
         </div>
+        <div class="orders-table-wrap">
+          <div class="table-header"><h3>Dernières commandes</h3></div>
+          <div id="dashOrders"></div>
+        </div>
+      </div>
 
-        <br>
-        <button type="submit" class="submit-btn">🎨 Envoyer ma commande →</button>
-      </form>
-    </div>
+      <!-- ALL ORDERS -->
+      <div class="admin-view" id="viewOrders">
+        <div class="admin-header"><h2>COMMANDES</h2><p>Gérez toutes les commandes reçues.</p></div>
+        <div class="orders-table-wrap">
+          <div class="table-header">
+            <h3>Toutes les commandes</h3>
+            <div class="table-search"><input type="text" placeholder="Rechercher..." oninput="filterOrders(this.value)"></div>
+          </div>
+          <div id="allOrders"></div>
+        </div>
+      </div>
 
-    <div class="success-msg" id="successMsg">
-      <div class="icon">✅</div>
-      <h3>COMMANDE REÇUE !</h3>
-      <p>Merci pour votre commande ! Nous vous contacterons via Discord ou email dans les <strong>2 prochaines heures</strong> pour confirmer les détails et démarrer la création.</p>
-    </div>
+      <!-- USERS -->
+      <div class="admin-view" id="viewUsers">
+        <div class="admin-header"><h2>UTILISATEURS</h2><p>Comptes enregistrés sur la plateforme.</p></div>
+        <div class="orders-table-wrap">
+          <div class="table-header"><h3>Liste des comptes</h3></div>
+          <div id="usersTable"></div>
+        </div>
+      </div>
+
+    </main>
   </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- FAQ -->
-<section class="section" id="faq">
-  <div class="section-label">Questions fréquentes</div>
-  <h2>FAQ</h2>
-
-  <div class="faq-list">
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Quel est le format de livraison ? <span class="faq-arrow">+</span></div>
-      <div class="faq-a">Nous livrons en PNG haute qualité (960×540px, format officiel Discord). Selon la formule choisie, vous recevez aussi le fichier PSD source et/ou une version GIF animée.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Comment se passe le paiement ? <span class="faq-arrow">+</span></div>
-      <div class="faq-a">Nous acceptons PayPal et carte bancaire. Le paiement s'effectue après validation de votre commande et avant le démarrage du design. Aucun paiement avant confirmation.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Puis-je demander des modifications ? <span class="faq-arrow">+</span></div>
-      <div class="faq-a">Bien sûr ! Selon votre formule, vous disposez de 1 à un nombre illimité de révisions. Nous ne sommes satisfaits que quand vous l'êtes.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Puis-je fournir mon propre logo ou image ? <span class="faq-arrow">+</span></div>
-      <div class="faq-a">Absolument ! Envoyez vos visuels par lien (Imgur, Google Drive) ou directement via Discord après votre commande. Assurez-vous d'avoir les droits sur ces images.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Puis-je commander plusieurs bannières ? <span class="faq-arrow">+</span></div>
-      <div class="faq-a">Oui ! Pour plusieurs bannières, contactez-nous directement sur Discord pour obtenir un devis groupé avec une remise.</div>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">BANNERFORGE</div>
-  <div>Design Discord professionnel — © 2025</div>
-  <div>Made with ♥ pour la communauté</div>
-</footer>
+</div>
 
 <script>
-  function selectPackage(name, el) {
-    document.querySelectorAll('.package').forEach(p => p.style.outline = 'none');
-    el.style.outline = '2px solid var(--accent)';
-    document.getElementById('packageSelect').value = name;
-  }
+// ===== STATE =====
+let currentUser = null;
+let currentOrderId = null;
+const ADMIN_U = '3xt4sy', ADMIN_P = 'Arracheur2_92i';
+const PRICES = { Starter: '5,99€', Pro: '12,99€' };
 
-  function selectPackageAndScroll(name, el) {
-    selectPackage(name, el);
-    setTimeout(() => {
-      document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  }
+function gd(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } }
+function sd(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
 
-  function toggleColor(el) {
-    el.classList.toggle('active');
-  }
+let orders = gd('bf_orders', []);
+let users = gd('bf_users', []);
 
-  function toggleFaq(item) {
-    item.classList.toggle('open');
+// ===== NAV =====
+function updateNav() {
+  const nr = document.getElementById('navRight');
+  if (!currentUser) {
+    nr.innerHTML = `<button class="btn-ghost" style="font-size:13px;" onclick="openAuth()">Connexion</button>
+                    <button class="btn-primary" onclick="goTo('order')">Commander</button>`;
+  } else if (currentUser.role === 'admin') {
+    nr.innerHTML = `<div class="user-badge"><div class="admin-dot"></div><strong>${currentUser.username}</strong>&nbsp;<span style="color:var(--gold);font-size:11px;font-weight:700;">ADMIN</span></div>
+                    <button class="btn-primary" onclick="showPage('admin');refreshAdmin()">Dashboard</button>
+                    <button class="btn-ghost" style="font-size:13px;" onclick="logout()">Déco</button>`;
+  } else {
+    nr.innerHTML = `<div class="user-badge"><strong>${currentUser.username}</strong></div>
+                    <button class="btn-ghost" style="font-size:13px;" onclick="logout()">Déconnexion</button>`;
   }
+}
 
-  function submitForm(e) {
-    e.preventDefault();
-    document.getElementById('formWrapper').style.display = 'none';
-    document.getElementById('successMsg').style.display = 'block';
+// ===== PAGES =====
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.getElementById(p + 'Page').classList.add('active');
+  window.scrollTo(0,0);
+}
+function goTo(id) {
+  showPage('home');
+  setTimeout(() => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 60);
+}
+
+// ===== AUTH =====
+function openAuth() { document.getElementById('authModal').classList.add('open'); }
+function closeAuth() { document.getElementById('authModal').classList.remove('open'); }
+function switchTab(t) {
+  document.getElementById('loginForm').style.display = t==='login'?'block':'none';
+  document.getElementById('registerForm').style.display = t==='register'?'block':'none';
+  document.getElementById('tabLogin').className = 'modal-tab'+(t==='login'?' active':'');
+  document.getElementById('tabRegister').className = 'modal-tab'+(t==='register'?' active':'');
+}
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  if (u === ADMIN_U && p === ADMIN_P) {
+    currentUser = { username: u, role: 'admin' };
+    closeAuth(); updateNav(); showPage('admin'); refreshAdmin(); return;
   }
+  const found = users.find(x => x.username === u && x.password === p);
+  if (found) { currentUser = { ...found, role: 'user' }; closeAuth(); updateNav(); err.style.display='none'; }
+  else { err.style.display='block'; }
+}
+function doRegister() {
+  const u = document.getElementById('regUser').value.trim();
+  const e = document.getElementById('regEmail').value.trim();
+  const p = document.getElementById('regPass').value;
+  const err = document.getElementById('regErr');
+  if (!u || !e || p.length < 6) { err.textContent='Remplissez tous les champs (mdp: 6+ caractères).'; err.style.display='block'; return; }
+  if (u === ADMIN_U) { err.textContent='Ce nom est réservé.'; err.style.display='block'; return; }
+  if (users.find(x => x.username === u)) { err.textContent='Ce pseudo est déjà utilisé.'; err.style.display='block'; return; }
+  const nu = { username:u, email:e, password:p, createdAt: new Date().toLocaleDateString('fr-FR') };
+  users.push(nu); sd('bf_users', users);
+  currentUser = { ...nu, role:'user' }; closeAuth(); updateNav(); err.style.display='none';
+}
+function logout() { currentUser=null; updateNav(); showPage('home'); }
 
-  // Stagger banner cards
-  document.querySelectorAll('.banner-card').forEach((card, i) => {
-    card.style.animationDelay = `${i * 0.1}s`;
-  });
+// ===== ORDER FORM =====
+function pickPkg(name) {
+  document.querySelectorAll('.package').forEach(p => p.style.outline='none');
+  document.getElementById('pkg'+name).style.outline='2px solid var(--accent)';
+  document.getElementById('packageSelect').value = name;
+  goTo('order');
+}
+function toggleColor(el) { el.classList.toggle('active'); }
+function toggleFaq(item) { item.classList.toggle('open'); }
+
+function submitOrder(e) {
+  e.preventDefault();
+  const pkg = document.getElementById('packageSelect').value;
+  const o = {
+    id: 'BF-' + Date.now(),
+    user: document.getElementById('oUser').value,
+    email: document.getElementById('oEmail').value,
+    package: pkg, price: PRICES[pkg]||'—',
+    style: document.getElementById('oStyle').value||'Non précisé',
+    server: document.getElementById('oServer').value,
+    desc: document.getElementById('oDesc').value,
+    status: 'pending',
+    date: new Date().toLocaleDateString('fr-FR')
+  };
+  orders.unshift(o); sd('bf_orders', orders);
+  document.getElementById('formWrapper').style.display='none';
+  document.getElementById('successMsg').style.display='block';
+}
+
+// ===== ADMIN =====
+function switchAdmin(view, el) {
+  document.querySelectorAll('.admin-view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('view'+view.charAt(0).toUpperCase()+view.slice(1)).classList.add('active');
+  el.classList.add('active');
+  if (view==='orders') renderOrders(orders, 'allOrders');
+  if (view==='users') renderUsers();
+}
+
+function refreshAdmin() {
+  orders = gd('bf_orders', []);
+  document.getElementById('statTotal').textContent = orders.length;
+  document.getElementById('statPending').textContent = orders.filter(o=>o.status==='pending').length;
+  document.getElementById('statProgress').textContent = orders.filter(o=>o.status==='progress').length;
+  document.getElementById('statDone').textContent = orders.filter(o=>o.status==='done').length;
+  renderOrders(orders.slice(0,5), 'dashOrders');
+}
+
+const statusBadge = {
+  pending: '<span class="badge b-pending">⏳ En attente</span>',
+  progress: '<span class="badge b-progress">🎨 En cours</span>',
+  done: '<span class="badge b-done">✅ Terminé</span>',
+  cancelled: '<span class="badge b-cancelled">❌ Annulé</span>'
+};
+
+function renderOrders(list, cid) {
+  const c = document.getElementById(cid);
+  if (!list.length) { c.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>Aucune commande.</p></div>'; return; }
+  c.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Client</th><th>Formule</th><th>Prix</th><th>Statut</th><th>Date</th><th></th></tr></thead>
+    <tbody>${list.map(o=>`<tr>
+      <td style="color:var(--muted);font-size:12px;">${o.id}</td>
+      <td><strong>${o.user}</strong><br><span style="color:var(--muted);font-size:12px;">${o.email}</span></td>
+      <td><span class="badge b-${o.package.toLowerCase()}">${o.package==='Starter'?'⚡':'🚀'} ${o.package}</span></td>
+      <td>${o.price}</td>
+      <td>${statusBadge[o.status]||o.status}</td>
+      <td style="color:var(--muted);font-size:13px;">${o.date}</td>
+      <td><button class="order-detail-btn" onclick="openDetail('${o.id}')">Voir →</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function filterOrders(q) {
+  const r = q ? orders.filter(o=>o.user.toLowerCase().includes(q.toLowerCase())||o.email.toLowerCase().includes(q.toLowerCase())||o.id.includes(q)||o.server.toLowerCase().includes(q.toLowerCase())) : orders;
+  renderOrders(r, 'allOrders');
+}
+
+function renderUsers() {
+  const c = document.getElementById('usersTable');
+  const all = [{ username:ADMIN_U, email:'admin@bannerforge.fr', role:'Admin', createdAt:'—' }, ...users.map(u=>({...u,role:'Utilisateur'}))];
+  c.innerHTML = `<table>
+    <thead><tr><th>Pseudo</th><th>Email</th><th>Rôle</th><th>Inscrit le</th></tr></thead>
+    <tbody>${all.map(u=>`<tr>
+      <td><strong>${u.username}</strong></td>
+      <td style="color:var(--muted)">${u.email}</td>
+      <td>${u.role==='Admin'?'<span class="badge" style="background:rgba(240,178,50,0.15);color:var(--gold);">👑 Admin</span>':'<span class="badge b-progress">👤 Utilisateur</span>'}</td>
+      <td style="color:var(--muted);font-size:13px;">${u.createdAt||'—'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ===== ORDER DETAIL =====
+function openDetail(id) {
+  const o = orders.find(x=>x.id===id); if(!o) return;
+  currentOrderId = id;
+  document.getElementById('detailId').textContent = '#'+o.id;
+  document.getElementById('dUser').textContent = o.user;
+  document.getElementById('dEmail').textContent = o.email;
+  document.getElementById('dPkg').textContent = o.package;
+  document.getElementById('dPrice').textContent = o.price;
+  document.getElementById('dStyle').textContent = o.style;
+  document.getElementById('dDate').textContent = o.date;
+  document.getElementById('dServer').textContent = o.server;
+  document.getElementById('dDesc').textContent = o.desc||'—';
+  document.getElementById('dStatus').value = o.status;
+  document.getElementById('orderDetailModal').classList.add('open');
+}
+function closeOrderDetail() { document.getElementById('orderDetailModal').classList.remove('open'); currentOrderId=null; }
+function updateOrderStatus() {
+  if(!currentOrderId) return;
+  const idx = orders.findIndex(x=>x.id===currentOrderId); if(idx===-1) return;
+  orders[idx].status = document.getElementById('dStatus').value;
+  sd('bf_orders', orders); refreshAdmin(); renderOrders(orders,'allOrders');
+}
+function deleteOrder() {
+  if(!currentOrderId) return;
+  if(!confirm('Supprimer définitivement cette commande ?')) return;
+  orders = orders.filter(x=>x.id!==currentOrderId);
+  sd('bf_orders', orders); closeOrderDetail(); refreshAdmin(); renderOrders(orders,'allOrders');
+}
+
+// ===== INIT =====
+updateNav();
+document.querySelectorAll('.banner-card').forEach((c,i)=>c.style.animationDelay=`${i*0.1}s`);
+document.getElementById('authModal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeAuth(); });
+document.getElementById('orderDetailModal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeOrderDetail(); });
 </script>
 </body>
 </html>
